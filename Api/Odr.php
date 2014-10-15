@@ -168,21 +168,21 @@ class Api_Odr
     /**
      * Check if domain is available or not
      *
-     * @param mixed $domain Either ID or domain name
+     * @param string|integer $domain Either ID or domain name
      * @return Api_Odr
      *
      * @throws Api_Odr_Exception
      */
     public function checkDomain($domain)
     {
-        if (!is_string($domain) || $domain === '') {
+        if (!is_numeric($domain) && (!is_string($domain) || $domain === '')) {
             throw new Api_Odr_Exception('Domain must be a string, but you give us a '. gettype($domain));
         }
 
         $domain = trim($domain, ' /.');
 
         if ($domain === '') {
-            throw new Api_Odr_Exception('Domain is required for this operation');
+            throw new Api_Odr_Exception('Domain name is required for this operation');
         }
 
         $this->_execute('/domain/available/'. $domain .'/', self::METHOD_GET);
@@ -193,8 +193,8 @@ class Api_Odr
     /**
      * Update existing domain with new data
      *
-     * @param mixed $id   Either ID or domain name
-     * @param array $data Data for update
+     * @param string|integer $id   Either ID or domain name
+     * @param array          $data Data for update
      * @return Api_Odr
      */
     public function updateDomain($id, array $data = array())
@@ -265,8 +265,9 @@ class Api_Odr
     /**
      * Get information about contact
      *
-     * @param integer $contactId
+     * @param int $contactId
      * @return Api_Odr
+     *
      * @throws Api_Odr_Exception
      */
     public function getContact($contactId)
@@ -286,6 +287,44 @@ class Api_Odr
         return $this;
     }
 
+    /**
+     * Get information about contact role
+     *
+     * @param int         $contactRoleId
+     * @param string|null $roleType
+     * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
+     */
+    public function getContactRole($contactRoleId, $roleType = null)
+    {
+        if (!is_numeric($contactRoleId)) {
+            throw new Api_Odr_Exception('Contact Role ID must be numeric');
+        }
+
+        $contactRoleId = (int)$contactRoleId;
+
+        if ($contactRoleId <= 0) {
+            throw new Api_Odr_Exception('Contact Role ID must be a positive number');
+        }
+
+        $url = '/contact-role/'. $contactRoleId;
+
+        if ($roleType !== null) {
+            $url .= '/'. $roleType;
+        }
+
+        $this->_execute($url .'/', self::METHOD_GET);
+
+        return $this;
+    }
+
+    /**
+     * Creates contact from passed data
+     *
+     * @param array $data Data for contact. If data is empty, $_REQUEST will be used
+     * @return Api_Odr
+     */
     public function createContact(array $data = array())
     {
         // Just in case someone decides to pass data as part of $_REQUEST
@@ -298,6 +337,14 @@ class Api_Odr
         return $this;
     }
 
+    /**
+     * Returns array of contact roles for passed contact ID
+     *
+     * @param int $contactId Contact ID, for which roles are requested
+     * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
+     */
     public function getContactRoles($contactId)
     {
         if (!is_numeric($contactId)) {
@@ -315,6 +362,16 @@ class Api_Odr
         return $this;
     }
 
+    /**
+     * Creates new contact role for existing contact
+     *
+     * @param integer $contactId Contact ID. Created role will be associated with this contact
+     * @param string  $roleId    Role of contact role, a. k. a., contact role for NL or BE, or EU, etc.
+     * @param array   $data      Data for new contact role. If empty, $_REQUEST will be used
+     * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
+     */
     public function createContactRole($contactId, $roleId, array $data = array())
     {
         if (!is_numeric($contactId)) {
@@ -342,6 +399,43 @@ class Api_Odr
         return $this;
     }
 
+    /**
+     * Deletes existing contact role for existing contact
+     *
+     * @param integer $contactId Contact ID
+     * @param string  $roleId    Role of contact role, a. k. a., contact role for NL or BE, or EU, etc.
+     * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
+     */
+    public function deleteContactRole($contactId, $roleId)
+    {
+        if (!is_numeric($contactId)) {
+            throw new Api_Odr_Exception('Contact ID must be numeric');
+        }
+
+        $contactId = (int)$contactId;
+
+        if ($contactId <= 0) {
+            throw new Api_Odr_Exception('Contact ID must be a positive number');
+        }
+
+        $roleId = trim($roleId);
+
+        if (!is_string($roleId) || $roleId === '') {
+            throw new Api_Odr_Exception('Role ID must be a string and not empty');
+        }
+
+        $this->_execute('/contact-role/'. $contactId .'/'. $roleId .'/', self::METHOD_DELETE);
+
+        return $this;
+    }
+
+    /**
+     * Returns list of user's nameservers
+     *
+     * @return Api_Odr
+     */
     public function getNameservers()
     {
         $this->_execute('/nameserver/', self::METHOD_GET);
@@ -421,11 +515,52 @@ class Api_Odr
         return $this;
     }
 
-    public function registerDomain($domain, $data)
+    /**
+     * Delete existing namserver role
+     *
+     * @param integer $nameserverId ID of nameserver to delete role from
+     * @param string  $roleId       Role name, like 'nl_common' or 'eu_onsite'
+     * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
+     */
+    public function deleteNameserverRole($nameserverId, $roleId)
     {
-        if (empty($data) && is_array($domain)) {
-            $data   = $domain;
-            $domain = null;
+        if (!is_numeric($nameserverId)) {
+            throw new Api_Odr_Exception('Nameserver ID must be numeric');
+        }
+
+        $nameserverId = (int)$nameserverId;
+
+        if ($nameserverId <= 0) {
+            throw new Api_Odr_Exception('Nameserver ID must be a positive number');
+        }
+
+        $roleId = trim($roleId);
+
+        if ($roleId === '') {
+            throw new Api_Odr_Exception('Role ID must be a string and not empty');
+        }
+
+        $this->_execute('/nameserver-role/'. $nameserverId .'/'. $roleId .'/', self::METHOD_DELETE);
+
+        return $this;
+    }
+
+    /**
+     * Registers new domain
+     *
+     * @param string|array $domainName Either domain name as string or whole request data as array (must have 'domain_name' key)
+     * @param array        $data       Data for new domain. Only usable if $domainName is a string
+     * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
+     */
+    public function registerDomain($domainName, array $data = array())
+    {
+        if (empty($data) && is_array($domainName)) {
+            $data   = $domainName;
+            $domainName = null;
         }
 
         if (empty($data)) {
@@ -437,7 +572,9 @@ class Api_Odr
 
             $cont = reset($dataContact);
 
-            $data['handle_contact'] = $cont['contact_id'];
+            if (!empty($cont['contact_id'])) {
+                $data['handle_contact'] = $cont['contact_id'];
+            }
         }
 
         if (!empty($data['nameserver_name']) && empty($data['handle_ns'])) {
@@ -445,10 +582,12 @@ class Api_Odr
 
             $ns = reset($dataNameserver);
 
-            $data['handle_ns'] = $ns['nameserver_id'];
+            if (!empty($ns['nameserver_id'])) {
+                $data['handle_ns'] = $ns['nameserver_id'];
+            }
         }
 
-        if ((!is_string($domain) || $domain === '') && array_key_exists('domain_name', $data) === false) {
+        if ((!is_string($domainName) || $domainName === '') && array_key_exists('domain_name', $data) === false) {
             throw new Api_Odr_Exception('No domain name defined');
         }
 
@@ -456,7 +595,11 @@ class Api_Odr
             throw new Api_Odr_Exception('No handle defined');
         }
 
-        $this->_execute('/domain/'. $domain .'/', self::METHOD_POST, $data);
+        if (!is_string($domainName) || $domainName === '') {
+            $domainName = $data['domain_name'];
+        }
+
+        $this->_execute('/domain/'. $domainName .'/', self::METHOD_POST, $data);
 
         return $this;
     }
@@ -468,6 +611,7 @@ class Api_Odr
      * @param mixed  $method If $what is an URL, then method should be a string. If not, then $method might be an array (instead of data) or null
      * @param array  $data   Additional data for request
      * @return Api_Odr
+     *
      * @throws Api_Odr_Exception
      */
     public function info($what, $method = null, array $data = array())
@@ -490,11 +634,10 @@ class Api_Odr
      * Request to any custom API URL
      * Works as shorthand for $this->_execute() function
      *
-     * @param string $url
-     * @param string $method
-     * @param array  $data
+     * @param string $url    Request URL
+     * @param string $method cURL request method
+     * @param array  $data   Data for request
      * @return Api_Odr
-     * @see _result()
      */
     public function custom($url, $method = self::DEFAULT_METHOD, array $data = array())
     {
@@ -524,7 +667,10 @@ class Api_Odr
      * @param string $method What method should be called
      * @param array  $data   Additional data to send
      * @return Api_Odr
+     *
      * @throws Api_Odr_Exception
+     *
+     * @protected
      */
     protected function _execute($url = '', $method = self::DEFAULT_METHOD, array $data = array())
     {
