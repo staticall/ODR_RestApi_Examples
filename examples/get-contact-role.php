@@ -8,6 +8,12 @@ $config = array(
     'api_secret' => '#API_SECRET#',
 );
 
+// ID of contact role you want to check
+$contactRoleId = 155;
+
+// Contact role type. Available contact role types can be found at /system/contact-roles/
+$contactRoleType = 'eu_onsite';
+
 // Create new instance of API demo class
 $demo = new Api_Odr($config);
 
@@ -23,7 +29,7 @@ if ($loginResult['status'] === 'error') {
 }
 
 // Request information about contact role
-$demo->getContactRole(155, 'eu_onsite');
+$demo->getContactRole($contactRoleId, $contactRoleType);
 
 // Get result of request
 $result = $demo->getResult();
