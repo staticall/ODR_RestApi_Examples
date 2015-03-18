@@ -8,6 +8,9 @@ $config = array(
     'api_secret' => '#API_SECRET#',
 );
 
+// Domain name you want to know how to register
+$domainName = 'test.nl';
+
 // Create new instance of API demo class
 $demo = new Api_Odr($config);
 
@@ -23,7 +26,7 @@ if ($loginResult['status'] === 'error') {
 }
 
 // Request information about domain registration
-$demo->infoRegisterDomain('test.nl');
+$demo->infoRegisterDomain($domainName);
 
 // Get result of request
 $result = $demo->getResult();
