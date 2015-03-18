@@ -8,6 +8,9 @@ $config = array(
     'api_secret' => '#API_SECRET#',
 );
 
+// Domain name you want to register
+$domainName = 'test.nl';
+
 // We assume that user already sent all the data to us through request
 $data = $_REQUEST;
 
@@ -26,7 +29,7 @@ if ($loginResult['status'] === 'error') {
 }
 
 // Create new domain, by passing request data
-$demo->registerDomain('test.nl', $data);
+$demo->registerDomain($domainName, $data);
 
 // Get result of request
 $result = $demo->getResult();
