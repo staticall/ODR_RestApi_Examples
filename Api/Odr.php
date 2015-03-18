@@ -32,7 +32,7 @@ class Api_Odr
      */
     public function __construct(array $config = array())
     {
-        if (extension_loaded('curl') === false) {
+        if (!extension_loaded('curl')) {
             echo 'cURL extension required by this class. Check you php.ini';
 
             exit();
