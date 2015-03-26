@@ -199,7 +199,7 @@ class Api_Odr
      */
     public function updateDomain($id, array $data = array())
     {
-        $this->_execute('/domain/'. trim($id) .'/', self::METHOD_POST, $data);
+        $this->_execute('/domain/'. trim($id) .'/', self::METHOD_PUT, $data);
 
         return $this;
     }
