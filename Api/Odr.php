@@ -51,6 +51,8 @@ class Api_Odr
      * @param array $config Configuration data
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
     public function __construct(array $config = array())
     {
@@ -69,7 +71,6 @@ class Api_Odr
      * Change configuration data
      *
      * @param array $config Configuration array
-     *
      * @return Api_Odr
      *
      * @throws Api_Odr_Exception
@@ -181,6 +182,8 @@ class Api_Odr
      * Return list of user's domains
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
     public function getDomains()
     {
@@ -193,6 +196,7 @@ class Api_Odr
      * Check if domain is available or not
      *
      * @param string|integer $domain Either ID or domain name
+     *
      * @return Api_Odr
      *
      * @throws Api_Odr_Exception
@@ -285,16 +289,20 @@ class Api_Odr
     /**
      * Creates unified contact from passed data
      *
-     * @param array $data Data for contact. If data is empty, $_REQUEST will be used
+     * @param array $data Data for contact
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
-    public function createContact(array $data = array())
+    public function createContact(array $data)
     {
-        // Just in case someone decides to pass data as part of $_REQUEST
+        // If you want to pass data directly as part of request, you can uncomment following lines:
+        /*
         if (empty($data)) {
             $data = $_REQUEST;
         }
+        */
 
         $this->_execute('/unified-contact/', self::METHOD_POST, $data);
 
@@ -311,23 +319,22 @@ class Api_Odr
      *
      * @throws Api_Odr_Exception
      */
-    public function registerDomain($domainName, array $data = array())
+    public function registerDomain($domainName, array $data)
     {
         if (empty($data) && is_array($domainName)) {
             $data       = $domainName;
             $domainName = null;
         }
 
+        // If you want to pass data directly as part of request, you can uncomment following lines:
+        /*
         if (empty($data)) {
             $data = $_REQUEST;
         }
+        */
 
         if ((!is_string($domainName) || $domainName === '') && array_key_exists('domain_name', $data) === false) {
             throw new Api_Odr_Exception('No domain name defined');
-        }
-
-        if (empty($data['handle_id'])) {
-            throw new Api_Odr_Exception('No handle defined');
         }
 
         if (!is_string($domainName) || $domainName === '') {
@@ -367,6 +374,8 @@ class Api_Odr
      * @param string $domainName Domain name to get info about
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
     public function infoRegisterDomain($domainName)
     {
@@ -382,6 +391,8 @@ class Api_Odr
      * @param array  $data   Data for request
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
     public function custom($url, $method = self::DEFAULT_METHOD, array $data = array())
     {
