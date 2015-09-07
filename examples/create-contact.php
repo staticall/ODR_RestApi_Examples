@@ -25,7 +25,7 @@ if ($loginResult['status'] === 'error') {
     exit(1);
 }
 
-// Create new contact, by passing request data
+// Create new unified contact, by passing request data
 $demo->createContact($data);
 
 // Get result of request

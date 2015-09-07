@@ -8,8 +8,7 @@ $config = array(
     'api_secret' => '#API_SECRET#',
 );
 
-// ID of the domain you want to get auth code for
-$domainId = '#DOMAIN_ID#';
+$domain_id = '#DOMAIN_ID#';
 
 // Create new instance of API demo class
 $demo = new Api_Odr($config);
@@ -26,21 +25,21 @@ if ($loginResult['status'] === 'error') {
 }
 
 // Get auth code for domain ID
-if (!is_numeric($domainId) || $domainId <= 0) {
+if (!is_numeric($domain_id) || $domain_id <= 0) {
     throw new Api_Odr_Exception('Domain ID must be a numeric and bigger than zero');
 }
 
 // Get result from request
-$result = $demo->custom('/domain/auth-code/'. $domainId .'/', Api_Odr::METHOD_GET);
+$result = $demo->custom('/domain/auth-code/'. $domain_id .'/', Api_Odr::METHOD_GET);
 
-if ($result['is_error'] || $result['data']['status'] === 'error') {
-    if ($result['is_error']) {
+if ($result['is_error'] === true || $result['data']['status'] === 'error') {
+    if ($result['is_error'] === true) {
         echo 'Following error occured: '. $result['error_msg'];
     } else {
         echo 'Following error occured: '. $result['data']['response'];
     }
 
-    exit(1);
+    exit();
 }
 
 $result = $result['data']['response'];
