@@ -19,7 +19,7 @@ $demo->login();
 
 $loginResult = $demo->getResult();
 
-if ($loginResult['status'] === 'error') {
+if ($loginResult['status'] === Api_Odr::STATUS_ERROR) {
     echo 'Can\'t login, reason - '. $loginResult['response'];
 
     exit(1);
@@ -31,8 +31,8 @@ $demo->infoRegisterDomain($domainName);
 // Get result of request
 $result = $demo->getResult();
 
-if ($result['status'] !== 'success') {
-    echo 'Following error occured: '. $result['response'];
+if ($result['status'] !== Api_Odr::STATUS_SUCCESS) {
+    echo 'Following error occurred: '. $result['response'];
 
     exit(1);
 }

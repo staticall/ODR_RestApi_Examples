@@ -8,6 +8,9 @@ $config = array(
     'api_secret' => '#API_SECRET#',
 );
 
+// Domain name you want to check
+$domainName = 'test.nl';
+
 // Create new instance of API demo class
 $demo = new Api_Odr($config);
 
@@ -16,20 +19,20 @@ $demo->login();
 
 $loginResult = $demo->getResult();
 
-if ($loginResult['status'] === 'error') {
+if ($loginResult['status'] === Api_Odr::STATUS_ERROR) {
     echo 'Can\'t login, reason - '. $loginResult['response'];
 
     exit(1);
 }
 
 // Check if target domain is available for registration or not
-$demo->checkDomain('test.nl');
+$demo->checkDomain($domainName);
 
 // Get result of request
 $result = $demo->getResult();
 
-if ($result['status'] !== 'success') {
-    echo 'Following error occured: '. $result['response'];
+if ($result['status'] !== Api_Odr::STATUS_SUCCESS) {
+    echo 'Following error occurred: '. $result['response'];
 
     exit();
 }
@@ -38,7 +41,7 @@ $result = $result['response'];
 
 if ($result['available'] === true) {
     // Domain is available for registration
-    echo 'Domain "test.nl" is available';
+    echo 'Domain "'. $domainName .'" is available';
 
     // Do something with available domain
 
@@ -46,4 +49,4 @@ if ($result['available'] === true) {
 }
 
 // D'oh, someone already took this domain!
-echo 'Domain "test.nl" is not available';
+echo 'Domain "'. $domainName .'" is not available';

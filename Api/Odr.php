@@ -8,14 +8,14 @@ class Api_Odr
      *
      * @protected
      */
-    protected $_result = null;
+    protected $_result;
 
     /**
      * @var null|string
      *
      * @protected
      */
-    protected $_error = null;
+    protected $_error;
 
     /**
      * @var array
@@ -34,7 +34,7 @@ class Api_Odr
     /**
      * In case URL will be changed in the future
      */
-    const URL = 'https://odrv2.opendomainregistry.net/api2/';
+    const URL = 'https://api.opendomainregistry.net/';
 
     const METHOD_GET     = 'GET';
     const METHOD_POST    = 'POST';
@@ -44,6 +44,9 @@ class Api_Odr
     const DEFAULT_METHOD = self::METHOD_GET;
 
     const MESSAGE_CURL_ERROR_FOUND = 'cURL error catched';
+
+    const STATUS_SUCCESS = 'success';
+    const STATUS_ERROR   = 'error';
 
     /**
      * Class constructor
@@ -62,7 +65,7 @@ class Api_Odr
             exit();
         }
 
-        if (!empty($config) && is_array($config)) {
+        if (count($config) > 0 && is_array($config)) {
             $this->setConfig($config);
         }
     }
@@ -71,19 +74,22 @@ class Api_Odr
      * Change configuration data
      *
      * @param array $config Configuration array
+     *
      * @return Api_Odr
      *
      * @throws Api_Odr_Exception
      */
     public function setConfig(array $config = array())
     {
-        if (empty($config)) {
+        if (count($config) === 0) {
             throw new Api_Odr_Exception('Config is not an array or empty');
         }
 
-        foreach ($config as $key => $value) {
-            $config[$key] = trim($value, ' /.,');
+        foreach ($config as &$value) {
+            $value = trim($value, ' /.,');
         }
+
+        unset($value);
 
         $this->_config = $config;
 
@@ -195,7 +201,7 @@ class Api_Odr
     /**
      * Check if domain is available or not
      *
-     * @param string|integer $domain Either ID or domain name
+     * @param string|int $domain Either ID or domain name
      *
      * @return Api_Odr
      *
@@ -221,8 +227,9 @@ class Api_Odr
     /**
      * Update existing domain with new data
      *
-     * @param string|integer $id   Either ID or domain name
-     * @param array          $data Data for update
+     * @param string|int $id   Either ID or domain name
+     * @param array      $data Data for update
+     *
      * @return Api_Odr
      */
     public function updateDomain($id, array $data = array())
@@ -235,11 +242,10 @@ class Api_Odr
     /**
      * Transfers domain from one user to another
      *
-     * @param string $id   Domain ID or domain name
-     * @param array  $data Data to update
-     * @return Api_Odr
+     * @param string|int $id   Domain ID or domain name
+     * @param array      $data Data to update
      *
-     * @todo Not implemented in the API yet, but will be
+     * @return Api_Odr
      */
     public function transferDomain($id, array $data = array())
     {
@@ -263,7 +269,7 @@ class Api_Odr
     /**
      * Get information about single unified contact
      *
-     * @param int $contactId
+     * @param int $contactId Contact ID
      *
      * @return Api_Odr
      *
@@ -321,7 +327,7 @@ class Api_Odr
      */
     public function registerDomain($domainName, array $data)
     {
-        if (empty($data) && is_array($domainName)) {
+        if (is_array($domainName) && count($data) === 0) {
             $data       = $domainName;
             $domainName = null;
         }
@@ -365,7 +371,7 @@ class Api_Odr
 
         $what = strtolower(trim($what));
 
-        return $this->custom('/info/'. ltrim($what, '/'), $method);
+        return $this->custom('/info/'. ltrim($what, '/'), $method, $data);
     }
 
     /**
@@ -452,11 +458,11 @@ class Api_Odr
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST,  $method);
 
-        if (!empty($data)) {
+        if (count($data) > 0) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         }
 
-        if (!empty($this->_headers)) {
+        if (count($this->_headers) > 0) {
             $headers = array();
 
             foreach ($this->_headers as $k => $v) {
@@ -489,7 +495,7 @@ class Api_Odr
     /**
      * Return request result
      *
-     * @return mixed
+     * @return null|array
      */
     public function getResult()
     {
@@ -499,10 +505,20 @@ class Api_Odr
     /**
      * Return possible cURL error
      *
-     * @return mixed
+     * @return null|string
      */
     public function getError()
     {
         return $this->_error;
+    }
+
+    /**
+     * Returns all headers, that will be set for request
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->_headers;
     }
 }

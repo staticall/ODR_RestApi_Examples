@@ -19,7 +19,7 @@ $demo->login();
 
 $loginResult = $demo->getResult();
 
-if ($loginResult['status'] === 'error') {
+if ($loginResult['status'] === Api_Odr::STATUS_ERROR) {
     echo 'Can\'t login, reason - '. $loginResult['response'];
 
     exit(1);
@@ -31,8 +31,14 @@ $demo->createContact($data);
 // Get result of request
 $result = $demo->getResult();
 
-if ($result['status'] !== 'success') {
-    echo 'Following error occured: '. $result['response'];
+if ($result['status'] !== Api_Odr::STATUS_SUCCESS) {
+    echo 'Following error occurred: '. $result['response'];
+
+    if (!empty($result['data'])) {
+        foreach ($result['data'] as $name => $error) {
+            echo "\r\n\t{$name}: {$error}";
+        }
+    }
 
     exit(1);
 }
@@ -40,4 +46,4 @@ if ($result['status'] !== 'success') {
 $result = $result['response'];
 
 // Contact successfully created, yay!
-echo 'Contact "'. $result['contact_first_name'] .' '. $result['contact_last_name'] .'" created';
+echo 'Contact "'. $result['full_name'] .'" created';

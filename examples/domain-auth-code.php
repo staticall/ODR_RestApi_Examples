@@ -8,7 +8,12 @@ $config = array(
     'api_secret' => '#API_SECRET#',
 );
 
-$domain_id = '#DOMAIN_ID#';
+// Either domain ID or domain name you want to get auth code for
+$domainId = 'test.nl';
+
+if (is_numeric($domainId) && $domainId <= 0) {
+    throw new Api_Odr_Exception('Domain ID must be a numeric and bigger than zero');
+}
 
 // Create new instance of API demo class
 $demo = new Api_Odr($config);
@@ -18,31 +23,24 @@ $demo->login();
 
 $loginResult = $demo->getResult();
 
-if ($loginResult['status'] === 'error') {
+if ($loginResult['status'] === Api_Odr::STATUS_ERROR) {
     echo 'Can\'t login, reason - '. $loginResult['response'];
 
     exit(1);
 }
 
-// Get auth code for domain ID
-if (!is_numeric($domain_id) || $domain_id <= 0) {
-    throw new Api_Odr_Exception('Domain ID must be a numeric and bigger than zero');
-}
+$demo->custom('/domain/auth-code/'. $domainId .'/', Api_Odr::METHOD_GET);
 
-// Get result from request
-$result = $demo->custom('/domain/auth-code/'. $domain_id .'/', Api_Odr::METHOD_GET);
+// Get result of request
+$result = $demo->getResult();
 
-if ($result['is_error'] === true || $result['data']['status'] === 'error') {
-    if ($result['is_error'] === true) {
-        echo 'Following error occured: '. $result['error_msg'];
-    } else {
-        echo 'Following error occured: '. $result['data']['response'];
-    }
+if ($result['status'] !== Api_Odr::STATUS_SUCCESS) {
+    echo 'Following error occurred: '. $result['response'];
 
     exit();
 }
 
-$result = $result['data']['response'];
+$result = $result['response'];
 
 if (!empty($result['auth_code'])) {
     echo 'Auth code for domain is "'. $result['auth_code'] .'"';
