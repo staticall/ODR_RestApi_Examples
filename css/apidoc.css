@@ -56,7 +56,6 @@ ol.linenums li {
  */
 body {
   position: relative;
-  padding-top: 40px;
 }
 
 h3 code {
@@ -989,4 +988,26 @@ a .address-bar, a:hover .address-bar
 footer
 {
   z-index: 60;
+}
+
+.sneak-preview {
+    padding: 10px 25px;
+    text-align: center;
+    color: #fff;
+    background-color: #2ecc71;
+    background-image: -webkit-linear-gradient(right, #24a1f1, #0dbaf2);
+    background-image: -moz-linear-gradient(right, #24a1f1, #0dbaf2);
+    background-image: -o-linear-gradient(right, #24a1f1, #0dbaf2);
+    background-image: -ms-linear-gradient(right, #24a1f1, #0dbaf2);
+    background-image: linear-gradient(to left, #24a1f1, #0dbaf2);
+    margin-bottom: 40px;
+}
+
+.sneak-preview a {
+    color: #fff;
+    text-shadow: 1px 1px rgba(0,0,0,.25);
+}
+
+body .navbar-fixed-top {
+    top: 40px;
 }
