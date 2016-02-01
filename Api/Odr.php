@@ -65,7 +65,7 @@ class Api_Odr
             exit();
         }
 
-        if (count($config) > 0 && is_array($config)) {
+        if (count($config) > 0) {
             $this->setConfig($config);
         }
     }
@@ -82,7 +82,7 @@ class Api_Odr
     public function setConfig(array $config = array())
     {
         if (count($config) === 0) {
-            throw new Api_Odr_Exception('Config is not an array or empty');
+            throw new Api_Odr_Exception('Config is empty');
         }
 
         foreach ($config as &$value) {
@@ -172,14 +172,14 @@ class Api_Odr
         $data = array(
             'timestamp' => $timestamp,
             'api_key'   => $apiKey,
-            'signature' => $signature,
+            'signature' => 'token$' . $signature,
         );
 
         $this->_execute('/user/login/', self::METHOD_POST, $data);
 
         $result = $this->_result;
 
-        $this->_headers[$result['response']['header']] = $result['response']['access_token'];
+        $this->setHeader($result['response']['as_header'], $result['response']['token']);
 
         return $this;
     }
@@ -246,6 +246,8 @@ class Api_Odr
      * @param array      $data Data to update
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
     public function transferDomain($id, array $data = array())
     {
@@ -255,19 +257,21 @@ class Api_Odr
     }
 
     /**
-     * Return list of user's unified contacts
+     * Return list of user's contacts
      *
      * @return Api_Odr
+     *
+     * @throws Api_Odr_Exception
      */
     public function getContacts()
     {
-        $this->_execute('/unified-contact/', self::METHOD_GET);
+        $this->_execute('/contact/', self::METHOD_GET);
 
         return $this;
     }
 
     /**
-     * Get information about single unified contact
+     * Get information about single contact
      *
      * @param int $contactId Contact ID
      *
@@ -287,13 +291,13 @@ class Api_Odr
             throw new Api_Odr_Exception('Contact ID must be a positive number');
         }
 
-        $this->_execute('/unified-contact/'. $contactId .'/', self::METHOD_GET);
+        $this->_execute('/contact/'. $contactId .'/', self::METHOD_GET);
 
         return $this;
     }
 
     /**
-     * Creates unified contact from passed data
+     * Creates contact from passed data
      *
      * @param array $data Data for contact
      *
@@ -310,7 +314,7 @@ class Api_Odr
         }
         */
 
-        $this->_execute('/unified-contact/', self::METHOD_POST, $data);
+        $this->_execute('/contact/', self::METHOD_POST, $data);
 
         return $this;
     }
@@ -371,7 +375,7 @@ class Api_Odr
 
         $what = strtolower(trim($what));
 
-        return $this->custom('/info/'. ltrim($what, '/'), $method, $data);
+        return $this->custom('/info/'. trim($what, '/') .'/', $method, $data);
     }
 
     /**
@@ -402,20 +406,9 @@ class Api_Odr
      */
     public function custom($url, $method = self::DEFAULT_METHOD, array $data = array())
     {
-        $this->_execute($url, $method, $data);
-
-        if (!empty($this->_error)) {
-            return array(
-                'is_error'  => true,
-                'error_msg' => $this->_error,
-            );
-        }
-
-        if (!empty($this->_result)) {
-            return array(
-                'is_error' => false,
-                'data'     => $this->_result,
-            );
+        try {
+            return $this->_execute($url, $method, $data);
+        } catch (Api_Odr_Exception $e) {
         }
 
         return $this;
@@ -436,25 +429,29 @@ class Api_Odr
      */
     protected function _execute($url = '', $method = self::DEFAULT_METHOD, array $data = array())
     {
+        $this->_result = null;
+
         if (!is_string($method) || $method === '') {
             $method = self::DEFAULT_METHOD;
         }
 
         $method = strtoupper($method);
+        $host   = $this->getUrl();
 
         if (!is_string($url) || $url === '') {
-            $url = self::URL;
+            $url = $host;
         }
 
         if (strpos($url, '/') === 0) {
-            $url = self::URL . ltrim($url, '/');
+            $url = $host . '/' . trim($url, '/') . '/';
         }
 
-        if (strpos($url, self::URL) !== 0) {
+        if (strpos($url, $host) !== 0) {
             throw new Api_Odr_Exception('Wrong host for URL ('. $url .')');
         }
 
         $ch = curl_init($url);
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST,  $method);
 
@@ -520,5 +517,36 @@ class Api_Odr
     public function getHeaders()
     {
         return $this->_headers;
+    }
+
+    /**
+     * Returns usable API URL
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return empty($this->_config['url']) ? self::URL : $this->_config['url'];
+    }
+
+    /**
+     * Sets header value
+     *
+     * @param string|array $name  Either array with headers to set or header key name
+     * @param mixed        $value Value for header (only if $name is string)
+     *
+     * @return Api_Odr
+     */
+    public function setHeader($name, $value = null)
+    {
+        if (!is_array($name)) {
+            $name = array(
+                $name => $value,
+            );
+        }
+
+        $this->_headers = array_merge($this->_headers, $name);
+
+        return $this;
     }
 }
