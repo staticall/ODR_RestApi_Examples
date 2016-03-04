@@ -113,7 +113,7 @@ class Api_Odr
         $this->_execute('/info/user/login', self::METHOD_POST);
 
         if (!empty($this->_error)) {
-            throw new Api_Odr_Exception(self::MESSAGE_CURL_ERROR_FOUND);
+            throw new Api_Odr_Exception($this->_error);
         }
 
         $result = $this->_result;
@@ -178,6 +178,10 @@ class Api_Odr
         $this->_execute('/user/login/', self::METHOD_POST, $data);
 
         $result = $this->_result;
+
+        if ($result['status'] === self::STATUS_ERROR) {
+            throw new Api_Odr_Exception($result['response']['message']);
+        }
 
         $this->setHeader($result['response']['as_header'], $result['response']['token']);
 
@@ -393,6 +397,19 @@ class Api_Odr
     }
 
     /**
+     * Changes autorenew state of domain
+     *
+     * @param string $domainName Domain name to change autorenew state
+     * @param bool   $state      Set autorenew on or off
+     *
+     * @return Api_Odr
+     */
+    public function setAutorenew($domainName, $state)
+    {
+        return $this->custom('/domain/' . $domainName . '/renew-' . ($state ? 'on' : 'off') .'/', Api_Odr::METHOD_PUT);
+    }
+
+    /**
      * Request to any custom API URL
      * Works as shorthand for $this->_execute() function
      *
@@ -409,6 +426,7 @@ class Api_Odr
         try {
             return $this->_execute($url, $method, $data);
         } catch (Api_Odr_Exception $e) {
+            $this->_error = $e->getMessage();
         }
 
         return $this;
@@ -483,7 +501,7 @@ class Api_Odr
         sleep(1);
 
         if (!empty($this->_error)) {
-            throw new Api_Odr_Exception(self::MESSAGE_CURL_ERROR_FOUND);
+            throw new Api_Odr_Exception($this->_error);
         }
 
         return $this;
