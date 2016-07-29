@@ -1,4 +1,4 @@
-# [ODR API Examples](http://staticall.github.io/ODR_RestApi_Examples/)
+# [ODR API Examples](http://api.opendomainregistry.net/docs/)
 
 This repo contains wrapper for updated Opendomainregistry API, as well as few examples of it's usage. Feel free to update the code as you pleased.
 
@@ -20,4 +20,4 @@ Then search for existing and closed issues. If your problem or idea is not addre
 
 ## Documentation
 
-Opendomainregistry documentation is publicly hosted on GitHub Pages at <http://staticall.github.io/ODR_RestApi_Examples/> and on Opendomainregistry website at <https://odrv2.opendomainregistry.net/?rm=api2doc>.
+Opendomainregistry documentation is available on Opendomainregistry website at <http://api.opendomainregistry.net/docs/>.
