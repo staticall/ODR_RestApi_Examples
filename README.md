@@ -1,5 +1,11 @@
 # [ODR API Examples](http://api.opendomainregistry.net/docs/)
 
+> Warning!
+
+> This version is deprecated in favor of official https://github.com/opendomainregistry/api_library
+
+> This version will no longer receive any updates
+
 This repo contains wrapper for updated Opendomainregistry API, as well as few examples of it's usage. Feel free to update the code as you pleased.
 
 ## Bugs and feature requests
